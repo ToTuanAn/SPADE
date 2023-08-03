@@ -114,7 +114,7 @@ class VGGLoss(nn.Module):
         loss = 0
         for i in range(len(x_vgg)):
             loss += self.weights[i] * self.criterion(x_vgg[i], y_vgg[i].detach())
-        print("Loss: ", loss.cpu())
+        # print("Loss: ", loss.cpu())
         return loss.cpu()
 
 
