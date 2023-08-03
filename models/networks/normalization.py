@@ -87,12 +87,12 @@ class SPADE(nn.Module):
 
         pw = ks // 2
 
-        self._conv = nn.Conv2d(label_nc, nhidden, kernel_size=1, stride=1)
+        # self._conv = nn.Conv2d(label_nc, nhidden, kernel_size=1, stride=1)
 
-        self.query = nn.Conv2d(label_nc, nhidden, kernel_size=1, stride=1)
-        self.key = nn.Conv2d(label_nc, nhidden, kernel_size=1, stride=1)
-        self.value = nn.Conv2d(label_nc, nhidden, kernel_size=1, stride=1)
-        self.alpha = nn.Parameter(torch.Tensor([0.001]))
+        self.query = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
+        self.key = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
+        self.value = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
+        self.alpha = nn.Parameter(torch.Tensor([1]))
 
         self.mlp_shared = nn.Sequential(
             nn.Conv2d(label_nc, nhidden, kernel_size=ks, padding=pw),
@@ -118,6 +118,9 @@ class SPADE(nn.Module):
         actv_beta = self.alpha * torch.matmul(h, f_g)
         actv_beta = self.relu(actv_beta)
 
+        # print(actv_beta.shape)
+        # print(normalized.shape)
+
         # actv = self.mlp_shared(segmap)
         #print("actv:", actv_beta)
         gamma = self.mlp_gamma(actv_beta)
@@ -127,3 +130,4 @@ class SPADE(nn.Module):
         out = normalized * (1 + gamma) + beta
 
         return out
+
