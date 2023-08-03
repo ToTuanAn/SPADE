@@ -103,7 +103,7 @@ class VGGLoss(nn.Module):
     def __init__(self, gpu_ids):
         super(VGGLoss, self).__init__()
         if torch.cuda.is_available():
-            self.vgg = VGG19().cuda()
+            self.vgg = VGG19().cpu()
         else:
             self.vgg = VGG19().cpu()
         self.criterion = nn.L1Loss()
