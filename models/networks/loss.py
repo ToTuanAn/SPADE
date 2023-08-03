@@ -114,7 +114,8 @@ class VGGLoss(nn.Module):
         loss = 0
         for i in range(len(x_vgg)):
             loss += self.weights[i] * self.criterion(x_vgg[i], y_vgg[i].detach())
-        return loss
+        print("Loss: ", loss.detach())
+        return loss.detach()
 
 
 # KL Divergence loss used in VAE with an image encoder
