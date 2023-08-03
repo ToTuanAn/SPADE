@@ -159,6 +159,9 @@ class Pix2PixModel(torch.nn.Module):
 	
 	fake_image = fake_image.cuda()
         real_image = real_image.cuda()
+        
+        print(fake_image)
+        print(real_image)
         if not self.opt.no_vgg_loss:
             G_losses['VGG'] = self.criterionVGG(fake_image, real_image) \
                 * self.opt.lambda_vgg
