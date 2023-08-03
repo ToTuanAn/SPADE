@@ -156,10 +156,8 @@ class Pix2PixModel(torch.nn.Module):
                         pred_fake[i][j], pred_real[i][j].detach())
                     GAN_Feat_loss += unweighted_loss * self.opt.lambda_feat / num_D
             G_losses['GAN_Feat'] = GAN_Feat_loss
-	
 	fake_image = fake_image.cuda()
-        real_image = real_image.cuda()
-        
+	real_image = real_image.cuda()
         print(fake_image)
         print(real_image)
         if not self.opt.no_vgg_loss:
