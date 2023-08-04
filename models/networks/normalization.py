@@ -87,11 +87,13 @@ class SPADE(nn.Module):
 
         pw = ks // 2
 
-        # self._conv = nn.Conv2d(label_nc, nhidden, kernel_size=1, stride=1)
+        #for real map
+        self.real_conv = nn.Conv2d(in_channels=3, out_channels=label_nc, kernel_size=3, padding=1)
 
         self.query = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
         self.key = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
         self.value = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
+
         self.alpha = nn.Parameter(torch.Tensor([1]))
 
         self.mlp_shared = nn.Sequential(
@@ -103,25 +105,24 @@ class SPADE(nn.Module):
         self.mlp_gamma = nn.Conv2d(nhidden, norm_nc, kernel_size=ks, padding=pw)
         self.mlp_beta = nn.Conv2d(nhidden, norm_nc, kernel_size=ks, padding=pw)
 
-    def forward(self, x, segmap):
+    def forward(self, x, segmap, realmap):
 
         # Part 1. generate parameter-free normalized activations
         normalized = self.param_free_norm(x)
 
         # Part 2. produce scaling and bias conditioned on semantic map
         segmap = F.interpolate(segmap, size=x.size()[2:], mode='nearest')
+        realmap = F.interpolate(realmap, size=x.size()[2:], mode='nearest')
+        realmap = self.real_conv(realmap)
 
-        f, g, h = self.query(segmap), self.key(segmap), self.value(segmap)
-        # f, g, h = self.relu(f), self.relu(g), self.relu(h)
+        f, g, h = self.query(segmap), self.key(realmap), self.value(realmap)
+        f, g, h = self.relu(f), self.relu(g), self.relu(h)
         f_g = F.softmax(torch.matmul(f.transpose(-2, -1), g))
-
+        # #
         actv_beta = self.alpha * torch.matmul(h, f_g)
         actv_beta = self.relu(actv_beta)
 
-        # print(actv_beta.shape)
-        # print(normalized.shape)
-
-        # actv = self.mlp_shared(segmap)
+        # actv_beta = self.mlp_shared(segmap)
         #print("actv:", actv_beta)
         gamma = self.mlp_gamma(actv_beta)
         beta = self.mlp_beta(actv_beta)
@@ -130,4 +131,3 @@ class SPADE(nn.Module):
         out = normalized * (1 + gamma) + beta
 
         return out
-

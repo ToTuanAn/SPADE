@@ -73,8 +73,10 @@ class SPADEGenerator(BaseNetwork):
 
         return sw, sh
 
-    def forward(self, input, z=None):
+    def forward(self, input, real_image, z=None):
         seg = input
+        print("Seg:", seg.shape)
+        print("Real_image:", real_image.shape)
 
         if self.opt.use_vae:
             # we sample z from unit normal and reshape the tensor
@@ -88,29 +90,31 @@ class SPADEGenerator(BaseNetwork):
             x = F.interpolate(seg, size=(self.sh, self.sw))
             x = self.fc(x)
 
-        x = self.head_0(x, seg)
+        print("X:", x.shape)
+
+        x = self.head_0(x, seg, real_image)
 
         x = self.up(x)
-        x = self.G_middle_0(x, seg)
+        x = self.G_middle_0(x, seg, real_image)
 
         if self.opt.num_upsampling_layers == 'more' or \
            self.opt.num_upsampling_layers == 'most':
             x = self.up(x)
 
-        x = self.G_middle_1(x, seg)
+        x = self.G_middle_1(x, seg, real_image)
 
         x = self.up(x)
-        x = self.up_0(x, seg)
+        x = self.up_0(x, seg, real_image)
         x = self.up(x)
-        x = self.up_1(x, seg)
+        x = self.up_1(x, seg, real_image)
         x = self.up(x)
-        x = self.up_2(x, seg)
+        x = self.up_2(x, seg, real_image)
         x = self.up(x)
-        x = self.up_3(x, seg)
+        x = self.up_3(x, seg, real_image)
 
         if self.opt.num_upsampling_layers == 'most':
             x = self.up(x)
-            x = self.up_4(x, seg)
+            x = self.up_4(x, seg, real_image)
 
         x = self.conv_img(F.leaky_relu(x, 2e-1))
         x = F.tanh(x)

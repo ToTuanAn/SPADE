@@ -47,19 +47,19 @@ class SPADEResnetBlock(nn.Module):
 
     # note the resnet block with SPADE also takes in |seg|,
     # the semantic segmentation map as input
-    def forward(self, x, seg):
-        x_s = self.shortcut(x, seg)
+    def forward(self, x, seg, real):
+        x_s = self.shortcut(x, seg, real)
 
-        dx = self.conv_0(self.actvn(self.norm_0(x, seg)))
-        dx = self.conv_1(self.actvn(self.norm_1(dx, seg)))
+        dx = self.conv_0(self.actvn(self.norm_0(x, seg, real)))
+        dx = self.conv_1(self.actvn(self.norm_1(dx, seg, real)))
 
         out = x_s + dx
 
         return out
 
-    def shortcut(self, x, seg):
+    def shortcut(self, x, seg, real):
         if self.learned_shortcut:
-            x_s = self.conv_s(self.norm_s(x, seg))
+            x_s = self.conv_s(self.norm_s(x, seg, real))
         else:
             x_s = x
         return x_s
