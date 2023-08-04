@@ -75,8 +75,8 @@ class SPADEGenerator(BaseNetwork):
 
     def forward(self, input, real_image, z=None):
         seg = input
-        print("Seg:", seg.shape)
-        print("Real_image:", real_image.shape)
+        # print("Seg:", seg.shape)
+        # print("Real_image:", real_image.shape)
 
         if self.opt.use_vae:
             # we sample z from unit normal and reshape the tensor
@@ -90,7 +90,7 @@ class SPADEGenerator(BaseNetwork):
             x = F.interpolate(seg, size=(self.sh, self.sw))
             x = self.fc(x)
 
-        print("X:", x.shape)
+        # print("X:", x.shape)
 
         x = self.head_0(x, seg, real_image)
 
