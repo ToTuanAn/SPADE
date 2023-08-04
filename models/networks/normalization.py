@@ -112,7 +112,7 @@ class SPADE(nn.Module):
         segmap = F.interpolate(segmap, size=x.size()[2:], mode='nearest')
 
         f, g, h = self.query(segmap), self.key(segmap), self.value(segmap)
-        f, g, h = self.relu(f), self.relu(g), self.relu(h)
+        # f, g, h = self.relu(f), self.relu(g), self.relu(h)
         f_g = F.softmax(torch.matmul(f.transpose(-2, -1), g))
 
         actv_beta = self.alpha * torch.matmul(h, f_g)
