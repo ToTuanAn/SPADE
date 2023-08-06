@@ -47,7 +47,7 @@ class SPADEGenerator(BaseNetwork):
         self.up_2 = SPADEResnetBlock(4 * nf, 2 * nf, opt)
         self.up_3 = SPADEResnetBlock(2 * nf, 1 * nf, opt)
 
-        final_nc = nf
+        final_nc = nf * 2
 
         if opt.num_upsampling_layers == 'most':
             self.up_4 = SPADEResnetBlock(1 * nf, nf // 2, opt)
@@ -109,8 +109,8 @@ class SPADEGenerator(BaseNetwork):
         x = self.up_1(x, seg, real_image)
         x = self.up(x)
         x = self.up_2(x, seg, real_image)
-        x = self.up(x)
-        x = self.up_3(x, seg, real_image)
+        # x = self.up(x)
+        # x = self.up_3(x, seg, real_image)
 
         if self.opt.num_upsampling_layers == 'most':
             x = self.up(x)
