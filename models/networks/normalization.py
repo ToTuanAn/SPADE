@@ -76,17 +76,17 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
     v = v.view(b, -1, h_kv * w_kv).transpose(-1, -2).contiguous()
     q_prune = q_prune.view(b, -1, h_q * w_q).transpose(-1, -2).contiguous()
     k_prune = k_prune.view(b, -1, h_kv * w_kv)
-    mask = SignWithSigmoidGrad.apply(torch.bmm(q_prune, k_prune) / k_prune.shape[1])
+    mask = SignWithSigmoidGrad.apply(torch.matmul(q_prune.transpose(-2, -1), k_prune) / k_prune.shape[1])
     # q: b, N_q, c_qk
     # k: b, c_qk, N_kv
     # v: b, N_kv, c_v
     if smooth is None:
         smooth = c_qk ** 0.5
-    cor_map = torch.bmm(q, k) / smooth
+    cor_map = torch.matmul(q.transpose(-2, -1), k) / smooth
     attn = torch.softmax(cor_map, dim=-1)
     # attn: b, N_q, N_kv
     masked_attn = attn * mask
-    output = torch.bmm(masked_attn, v)
+    output = torch.matmul(masked_attn.transpose(-2, -1), v)
     # output: b, N_q, c_v
     output = output.transpose(-1, -2).contiguous().view(b, -1, h_q, w_q)
     conf = masked_attn.sum(-1).view(b, 1, h_q, w_q)
@@ -144,12 +144,6 @@ class SPADE(nn.Module):
         #for real map
         self.real_conv = nn.Conv2d(in_channels=3, out_channels=label_nc, kernel_size=3, padding=1)
 
-        # self.query = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
-        # self.key = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
-        # self.value = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
-        # self.query = nn.Conv2d(label_nc, nhidden, kernel_size=1, stride=1)
-        # self.key = nn.Conv2d(label_nc, nhidden, kernel_size=1, stride=1)
-        # self.value = nn.Conv2d(label_nc, nhidden, kernel_size=1, stride=1)
         self.f = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
         self.g = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
         self.h = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
@@ -182,18 +176,9 @@ class SPADE(nn.Module):
 
         attn_output, cor_map, conf, output2 = dynamic_attention(
             self.f(segmap), self.g(realmap), self.f_prune(segmap), self.g_prune(realmap), self.h(realmap), None, None)
-        # f, g, h = self.query(segmap), self.key(realmap), self.value(realmap)
-        # f, g, h = self.relu(f), self.relu(g), self.relu(h)
-        # f_g = F.softmax(torch.matmul(f.transpose(-2, -1), g))
-        # #
-        # actv_beta = self.alpha * torch.matmul(h, f_g)
-        # actv_beta = self.relu(actv_beta)
 
         actv_beta = self.relu(attn_output)
-        # print(actv_beta.shape)
-
-        # actv_beta = self.mlp_shared(segmap)
-        #print("actv:", actv_beta)
+        
         gamma = self.mlp_gamma(actv_beta)
         beta = self.mlp_beta(actv_beta)
 
