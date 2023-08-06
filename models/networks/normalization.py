@@ -75,13 +75,13 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
     q = q.view(b, c_qk, h_q * w_q).transpose(-1, -2).contiguous()
     k = k.view(b, c_qk, h_kv * w_kv)
     v = v.view(b, -1, h_kv * w_kv).transpose(-1, -2).contiguous()
-    q_prune = q_prune.view(b, -1, h_q * w_q).transpose(-1, -2).contiguous()
-    k_prune = k_prune.view(b, -1, h_kv * w_kv)
+    # q_prune = q_prune.view(b, -1, h_q * w_q).transpose(-1, -2).contiguous()
+    # k_prune = k_prune.view(b, -1, h_kv * w_kv)
 
     torch.cuda.empty_cache()
     gc.collect()
 
-    mask = SignWithSigmoidGrad.apply(torch.matmul(q_prune, k_prune) / k_prune.shape[1])
+    # mask = SignWithSigmoidGrad.apply(torch.matmul(q_prune, k_prune) / k_prune.shape[1])
 
     torch.cuda.empty_cache()
     gc.collect()
@@ -94,7 +94,7 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
     attn = torch.softmax(cor_map, dim=-1)
 
     # attn: b, N_q, N_kv
-    masked_attn = attn * mask
+    # masked_attn = attn * mask
     output = torch.matmul(masked_attn, v)
     # output: b, N_q, c_v
     output = output.transpose(-1, -2).contiguous().view(b, -1, h_q, w_q)
