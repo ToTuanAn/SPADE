@@ -98,11 +98,6 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
     output = torch.matmul(masked_attn, v)
     # output: b, N_q, c_v
     output = output.transpose(-1, -2).contiguous().view(b, -1, h_q, w_q)
-    # conf = masked_attn.sum(-1).view(b, 1, h_q, w_q)
-
-    # conf_map = torch.max(cor_map, -1, keepdim=True)[0]
-    # conf_map = (conf_map - conf_map.mean(dim=1, keepdim=True)).view(b, 1, h_q, w_q)
-    # conf_map = torch.sigmoid(conf_map * 10.0)
 
     if v2 is not None:
         v2 = v2.view(b, -1, h_kv * w_kv).transpose(-1, -2).contiguous()
@@ -156,8 +151,8 @@ class SPADE(nn.Module):
         self.f = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
         self.g = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
         self.h = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
-        self.f_prune = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
-        self.g_prune = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
+        self.f_prune = nn.Conv2d(label_nc, nhidden//2, kernel_size=ks, stride=1, padding=pw)
+        self.g_prune = nn.Conv2d(label_nc, nhidden//2, kernel_size=ks, stride=1, padding=pw)
 
         # self.alpha = nn.Parameter(torch.Tensor([1]))
 
