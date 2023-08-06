@@ -139,7 +139,7 @@ class SPADE(nn.Module):
                              % param_free_norm_type)
 
         # The dimension of the intermediate embedding space. Yes, hardcoded.
-        nhidden = 32
+        nhidden = 128
 
         pw = ks // 2
 
@@ -149,8 +149,8 @@ class SPADE(nn.Module):
         self.f = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
         self.g = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
         self.h = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
-        self.f_prune = nn.Conv2d(label_nc, nhidden//2, kernel_size=ks, stride=1, padding=pw)
-        self.g_prune = nn.Conv2d(label_nc, nhidden//2, kernel_size=ks, stride=1, padding=pw)
+        self.f_prune = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
+        self.g_prune = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
 
         # self.alpha = nn.Parameter(torch.Tensor([1]))
 
