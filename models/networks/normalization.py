@@ -77,6 +77,10 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
     v = v.view(b, -1, h_kv * w_kv).transpose(-1, -2).contiguous()
     q_prune = q_prune.view(b, -1, h_q * w_q).transpose(-1, -2).contiguous()
     k_prune = k_prune.view(b, -1, h_kv * w_kv)
+    
+    torch.cuda.empty_cache()
+    gc.collect()
+
     mask = SignWithSigmoidGrad.apply(torch.matmul(q_prune, k_prune) / k_prune.shape[1])
 
     del q_prune
