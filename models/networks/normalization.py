@@ -77,6 +77,9 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
     q_prune = q_prune.view(b, -1, h_q * w_q).transpose(-1, -2).contiguous()
     k_prune = k_prune.view(b, -1, h_kv * w_kv)
     mask = SignWithSigmoidGrad.apply(torch.matmul(q_prune, k_prune) / k_prune.shape[1])
+
+    del q_prune
+    del k_prune
     # q: b, N_q, c_qk
     # k: b, c_qk, N_kv
     # v: b, N_kv, c_v
@@ -150,12 +153,12 @@ class SPADE(nn.Module):
         self.f_prune = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
         self.g_prune = nn.Conv2d(label_nc, nhidden, kernel_size=ks, stride=1, padding=pw)
 
-        self.alpha = nn.Parameter(torch.Tensor([1]))
+        # self.alpha = nn.Parameter(torch.Tensor([1]))
 
-        self.mlp_shared = nn.Sequential(
-            nn.Conv2d(label_nc, nhidden, kernel_size=ks, padding=pw),
-            nn.ReLU()
-        )
+        # self.mlp_shared = nn.Sequential(
+        #     nn.Conv2d(label_nc, nhidden, kernel_size=ks, padding=pw),
+        #     nn.ReLU()
+        # )
 
         self.relu = nn.ReLU()
         self.mlp_gamma = nn.Conv2d(nhidden, norm_nc, kernel_size=ks, padding=pw)
