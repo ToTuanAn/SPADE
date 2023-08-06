@@ -77,7 +77,7 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
     v = v.view(b, -1, h_kv * w_kv).transpose(-1, -2).contiguous()
     q_prune = q_prune.view(b, -1, h_q * w_q).transpose(-1, -2).contiguous()
     k_prune = k_prune.view(b, -1, h_kv * w_kv)
-    
+
     torch.cuda.empty_cache()
     gc.collect()
 
@@ -151,7 +151,7 @@ class SPADE(nn.Module):
                              % param_free_norm_type)
 
         # The dimension of the intermediate embedding space. Yes, hardcoded.
-        nhidden = 64
+        nhidden = 32
 
         pw = ks // 2
 
