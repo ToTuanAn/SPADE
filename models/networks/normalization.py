@@ -109,7 +109,7 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
                             v2).transpose(-1, -2).contiguous().view(b, -1, h_q, w_q)
     else:
         output2 = None
-    return output, cor_map, conf, output2
+    return output, None, conf, output2
 
 
 # Creates SPADE normalization layer based on the given configuration
