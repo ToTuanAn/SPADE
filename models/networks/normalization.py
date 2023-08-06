@@ -95,7 +95,8 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
 
     # attn: b, N_q, N_kv
     # masked_attn = attn * mask
-    output = torch.matmul(masked_attn, v)
+    # output = torch.matmul(masked_attn, v)
+    output = torch.matmul(attn, v)
     # output: b, N_q, c_v
     output = output.transpose(-1, -2).contiguous().view(b, -1, h_q, w_q)
 
