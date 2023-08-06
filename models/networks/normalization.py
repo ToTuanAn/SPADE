@@ -90,13 +90,13 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
     # v: b, N_kv, c_v
     if smooth is None:
         smooth = c_qk ** 0.5
-    cor_map = torch.matmul(q.view(b, c_qk, h_q * w_q).transpose(-2, -1), k) / smooth
+    cor_map = torch.matmul(q.view(b, c_qk, h_q * w_q).transpose(-1, -2), k.view(b, c_qk, h_kv * w_kv)) / smooth
     attn = torch.softmax(cor_map, dim=-1)
 
     # attn: b, N_q, N_kv
     # masked_attn = attn * mask
     # output = torch.matmul(masked_attn, v)
-    output = torch.matmul(attn, v.view(b, -1, h_kv * w_kv).transpose(-2, -1))
+    output = torch.matmul(attn, v.view(b, -1, h_kv * w_kv).transpose(-1, -2))
     # output: b, N_q, c_v
     output = output.transpose(-1, -2).contiguous().view(b, -1, h_q, w_q)
 
