@@ -99,13 +99,13 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
     # output: b, N_q, c_v
     output = output.transpose(-1, -2).contiguous().view(b, -1, h_q, w_q)
 
-    if v2 is not None:
-        v2 = v2.view(b, -1, h_kv * w_kv).transpose(-1, -2).contiguous()
-        output2 = torch.bmm(torch.softmax(torch.masked_fill(cor_map, mask.bool(), -1e4), dim=-1),
-                            v2).transpose(-1, -2).contiguous().view(b, -1, h_q, w_q)
-    else:
-        output2 = None
-    return output, None, None, output2
+    del q
+    del k 
+    del v
+    del q_prune
+    del k_prune
+    
+    return output, None, None, None
 
 
 # Creates SPADE normalization layer based on the given configuration

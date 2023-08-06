@@ -110,7 +110,7 @@ class SPADEGenerator(BaseNetwork):
         x = self.up(x)
         x = self.up_2(x, seg, real_image)
         x = self.up(x)
-        # x = self.up_3(x, seg, real_image)
+        x = self.up_3(x, seg, real_image)
 
         if self.opt.num_upsampling_layers == 'most':
             x = self.up(x)
