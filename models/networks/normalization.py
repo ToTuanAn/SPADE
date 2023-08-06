@@ -97,7 +97,9 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
     output = torch.matmul(masked_attn, v)
     # output: b, N_q, c_v
     output = output.transpose(-1, -2).contiguous().view(b, -1, h_q, w_q)
-    conf = masked_attn.sum(-1).view(b, 1, h_q, w_q)
+
+    del masked_attn
+    # conf = masked_attn.sum(-1).view(b, 1, h_q, w_q)
 
     # conf_map = torch.max(cor_map, -1, keepdim=True)[0]
     # conf_map = (conf_map - conf_map.mean(dim=1, keepdim=True)).view(b, 1, h_q, w_q)
@@ -109,7 +111,7 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
                             v2).transpose(-1, -2).contiguous().view(b, -1, h_q, w_q)
     else:
         output2 = None
-    return output, None, conf, output2
+    return output, None, None, output2
 
 
 # Creates SPADE normalization layer based on the given configuration
