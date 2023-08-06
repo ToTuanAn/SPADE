@@ -77,10 +77,7 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
     v = v.view(b, -1, h_kv * w_kv).transpose(-1, -2).contiguous()
     q_prune = q_prune.view(b, -1, h_q * w_q).transpose(-1, -2).contiguous()
     k_prune = k_prune.view(b, -1, h_kv * w_kv)
-    mask = SignWithSigmoidGrad.apply(torch.matmul(q_prune, k_prune) / k_prune.shape[1])
-
-    del q_prune
-    del k_prune
+   
     torch.cuda.empty_cache()
     gc.collect()
     # q: b, N_q, c_qk
@@ -90,6 +87,14 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
         smooth = c_qk ** 0.5
     cor_map = torch.matmul(q, k) / smooth
     attn = torch.softmax(cor_map, dim=-1)
+
+    del cor_map
+
+    mask = SignWithSigmoidGrad.apply(torch.matmul(q_prune, k_prune) / k_prune.shape[1])
+    
+    del q_prune
+    del k_prune
+
     # attn: b, N_q, N_kv
     masked_attn = attn * mask
     output = torch.matmul(masked_attn, v)
@@ -107,7 +112,7 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
                             v2).transpose(-1, -2).contiguous().view(b, -1, h_q, w_q)
     else:
         output2 = None
-    return output, cor_map, conf, output2
+    return output, None, conf, output2
 
 
 # Creates SPADE normalization layer based on the given configuration
