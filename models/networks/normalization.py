@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from models.networks.sync_batchnorm import SynchronizedBatchNorm2d
 import torch.nn.utils.spectral_norm as spectral_norm
+import gc
 
 
 # Returns a function that creates a normalization function
@@ -80,6 +81,8 @@ def dynamic_attention(q, k, q_prune, k_prune, v, smooth=None, v2=None):
 
     del q_prune
     del k_prune
+    torch.cuda.empty_cache()
+    gc.collect()
     # q: b, N_q, c_qk
     # k: b, c_qk, N_kv
     # v: b, N_kv, c_v
